@@ -1,0 +1,90 @@
+{% extends "index_doctor.html" %}
+{% block title %}历史信息{% endblock %}
+
+
+{% block body %}
+<table id="demo" lay-filter="demo"></table>
+{% endblock %}
+
+{% block script %}
+
+layui.use('table', function(){
+  var table = layui.table;
+
+  //第一个实例
+  table.render({
+    elem: '#demo'
+    ,height: 312
+    ,url: '/oldmsg/table/' //数据接口
+    ,page: true //开启分页
+    ,cols: [[ //表头
+      {field: 'id', title: 'ID', width:80, sort: true, fixed: 'left'}
+      ,{field: 'f1', title: 'Feature1', width:150, sort: true,edit: 'text'}
+      ,{field: 'f2', title: 'Feature2', width:150, sort: true,edit: 'text'}
+      ,{field: 'f3', title: 'Feature3', width:150, sort: true,edit: 'text'}
+      ,{field: 'label', title: 'Label', width: 177,edit: 'text'}
+      ,{fixed: 'right', title:'操作', toolbar: '#barDemo', width:150}
+    ]]
+  });
+
+  table.on('tool(demo)', function(obj){
+    var data = obj.data;
+    console.log(obj.data.id)
+    if(obj.event === 'del'){
+      layer.confirm('真的删除行么', function(index){
+        obj.del();
+        layer.close(index);
+
+        var reform= new FormData();
+        reform.append("id",obj.data.id);
+        $.ajax({
+            url:"{{ url_for('delitem') }}",
+            type:"post",
+            data:reform,
+            dataType: 'json',
+            processData:false,
+            contentType:false,
+            success:function(data){
+                    console.log("delete success")
+            },
+            error:function(e){
+                    alert("error");
+            }
+        })
+
+      });
+    }
+  });
+  table.on('edit(demo)', function(obj){
+    var value = obj.value //得到修改后的值
+    ,data = obj.data //得到所在行所有键值
+    ,field = obj.field; //得到字段
+    layer.msg('[ID: '+ data.id +'] ' + field + ' 字段更改为：'+ value);
+
+        var reform= new FormData();
+        reform.append("id",obj.data.id);
+        reform.append("f1",obj.data.f1);
+        reform.append("f2",obj.data.f2);
+        reform.append("f3",obj.data.f3);
+        reform.append("label",obj.data.label);
+        reform.set(field,value);
+        $.ajax({
+            url:"{{ url_for('changeitem') }}",
+            type:"post",
+            data:reform,
+            dataType: 'json',
+            processData:false,
+            contentType:false,
+            success:function(data){
+                    console.log("change success")
+            },
+            error:function(e){
+                    alert("error");
+            }
+        })
+
+  });
+
+});
+{% endblock %}
+

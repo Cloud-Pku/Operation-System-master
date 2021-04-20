@@ -1,0 +1,64 @@
+{% extends "index_doctor.html" %}
+{% block title %}模型预测{% endblock %}
+
+
+{% block body %}
+<div style="width: 1200px;margin: auto">
+    <br />
+    <form action ="predict_model" class="layui-form" method="post" id="predict">
+    {{ form.csrf_token }}
+        <div class="layui-form-item">
+                <label class="layui-form-label">Feature1</label>
+                <div class="layui-input-block">
+                  {{ form.f1(class="layui-input",placeholder="请输入Feature1",id = "inputf1") }}
+                </div>
+        </div>
+        <div class="layui-form-item">
+                <label class="layui-form-label">Feature2</label>
+                <div class="layui-input-block">
+                  {{ form.f2(class="layui-input",placeholder="请输入Feature2",id = "inputf2") }}
+                </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">Feature3</label>
+            <div class="layui-input-block">
+              {{ form.f3(class="layui-input",placeholder="请输入Feature3" ,id = "inputf3") }}
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">Label</label>
+            <div class="layui-input-block">
+              {{ form.label(class="layui-input",readonly = "readonly",id = "label") }}
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+              <button class="layui-btn" lay-submit lay-filter="formDemo">立即提交</button>
+              <button type="reset" class="layui-btn layui-btn-primary" lay-submit lay-filter="tt">重置</button>
+            </div>
+        </div>
+    </form>
+
+    <table id="test" lay-filter="test"></table>
+</div>
+{% endblock %}
+
+{% block script %}
+
+    layui.use('form', function(){
+      var form = layui.form;
+      form.on('submit(tt)', function(data){
+           var field = data.field;
+           //执行操作
+            document.getElementById("inputf1").value="";
+            document.getElementById("inputf2").value="";
+            document.getElementById("inputf3").value="";
+            document.getElementById("label").value="";
+            return false;
+            });
+
+
+    });
+
+{% endblock %}
+
