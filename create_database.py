@@ -1,12 +1,30 @@
 # -*- coding:utf-8 -*-
 __author__ = "MuT6 Sch01aR"
+from flask import Flask, render_template, session, redirect, url_for, flash, request, jsonify
+import os
+from flask_sqlalchemy import SQLAlchemy
+from flask_script import Manager, Shell
+from forms import Login, SearchBookForm, ChangePasswordForm, EditInfoForm, SearchStudentForm, NewStoreForm, StoreForm, BorrowForm,FeatureForm, HarrisScoreForm
+from flask_login import UserMixin, LoginManager, login_required, login_user, logout_user, current_user
+import time, datetime
 
+
+basedir = os.path.abspath(os.path.dirname(__file__))
+
+app = Flask(__name__)
+manager = Manager(app)
+
+app.config['SECRET_KEY'] = 'hard to guess string'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'data.sqlite')
+app.config['SQLALCHEMY_COMMIT_ON_TEARDOWN'] = True
+db = SQLAlchemy(app)
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, String, Integer
-
+Base = declarative_base()
 engine = create_engine("mysql+pymysql://root:root@127.0.0.1/test", encoding="utf-8", echo=True, max_overflow=5)
 # 连接mysql数据库，echo为是否打印结果
+
 
 class Admin(UserMixin, db.Model):
     __tablename__ = 'admin'
@@ -48,6 +66,26 @@ class PredictData(db.Model):
         self.label = label
     def __repr__(self):
         return '<f1: %r f2: %r f3: %r label: %r>' % (self.f1,self.f2,self.f3,self.label)
+
+
+
+class HarrisScoreData(db.Model):
+    __tablename__ = 'harrisscore_data'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    subtime = db.Column(db.String(64))
+    pain = db.Column(db.String(64))
+    func = db.Column(db.String(64))
+    rng = db.Column(db.String(64))
+    score = db.Column(db.String(64))
+    def __init__(self,subtime, pain, func, rng, score):
+        self.subtime = subtime
+        self.pain = pain
+        self.func = func
+        self.rng = rng
+        self.score = score
+    def __repr__(self):
+        return '<time: %r pain: %r function: %r range: %r score: %r>\n' % (self.subtime,self.pain,self.func,self.rng,self.score)
+
 
 
 class Book(db.Model):

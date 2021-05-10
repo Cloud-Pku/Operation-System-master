@@ -23,6 +23,7 @@ class Admin(UserMixin, db.Model):
     admin_name = db.Column(db.String(32))
     password = db.Column(db.String(24))
     right = db.Column(db.String(32))
+    harris_table =  db.relationship('HarrisScoreData',backref='user')
 
     def __init__(self, admin_id, admin_name, password, right):
         self.admin_id = admin_id
@@ -57,17 +58,38 @@ class PredictData(db.Model):
     def __repr__(self):
         return '<f1: %r f2: %r f3: %r label: %r>' % (self.f1,self.f2,self.f3,self.label)
 
-# 创建新User对象:
-new_user =Admin(admin_id='22222',admin_name='patient',password='12345',right='2')
-db.session.add(new_user)
-db.session.commit()
+class HarrisScoreData(db.Model):
+    __tablename__ = 'harrisscore_data'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    subtime = db.Column(db.String(64))
+    pain = db.Column(db.String(64))
+    func = db.Column(db.String(64))
+    rng = db.Column(db.String(64))
+    score = db.Column(db.String(64))
+    user_id = db.Column(db.Integer, db.ForeignKey('admin.admin_id'))
+    def __init__(self,subtime, pain, func, rng, score,user_id):
+        self.subtime = subtime
+        self.pain = pain
+        self.func = func
+        self.rng = rng
+        self.score = score
+        self.user_id = user_id
+    def __repr__(self):
+        return '<time: %r pain: %r function: %r range: %r score: %r>\n' % (self.subtime,self.pain,self.func,self.rng,self.score)
+
+
+# # 创建新User对象:
+# new_user =Admin(admin_id='11111',admin_name='doctor',password='12345',right='1')
+# db.session.add(new_user)
+# db.session.commit()
 
 #
 # stu = Admin.query.get(0)
 # db.session.delete(stu)  # 删除
 # db.session.commit()  # 提交事务
 
-# stu = Admin.query.filter_by(admin_id='cloud', password='12345').first()
+stu = Admin.query.filter_by(admin_id='22222').first()
+print(stu.harris_table)
 
 # sut = PredictData.query.all()
 # print(sut)
@@ -77,3 +99,4 @@ db.session.commit()
 # PredictData.query.delete()
 # db.session.commit()
 
+#db.create_all()

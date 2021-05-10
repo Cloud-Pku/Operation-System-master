@@ -1,0 +1,77 @@
+{% extends 'index_patient.html' %}
+{% block title %}恢复情况视图{% endblock %}
+
+{% block body %}
+<fieldset class="layui-elem-field layui-field-title">
+    <div class="layui-card">
+         <div class="layui-card-header"><i class="fa fa-line-chart icon"></i>报表统计</div>
+         <div class="layui-card-body">
+             <div id="echarts-records" style="width: 100%;min-height:500px"></div>
+         </div>
+    </div>
+</fieldset>
+{% endblock %}
+{% block script %}
+/**
+ * 报表功能
+ */
+var echartsRecords = echarts.init(document.getElementById('echarts-records'), 'walden');
+// 显示标题，图例和空的坐标轴
+echartsRecords.setOption({
+    title: {
+        text: '恢复情况'
+    },
+    tooltip: {
+        trigger: 'axis'
+    },
+    legend: {
+        data: ['patient']
+    },
+    grid: {
+        left: '3%',
+        right: '4%',
+        bottom: '3%',
+        containLabel: true
+    },
+    toolbox: {
+        feature: {
+            saveAsImage: {}
+        }
+    },
+    xAxis: {
+        type: 'category',
+        boundaryGap: false,
+        data: []
+    },
+    yAxis: [
+        {
+            //设置类别
+            type: 'value',
+            //y轴刻度
+            axisLabel: {
+                //设置y轴数值为%
+                formatter: '{value} %',
+            },
+        }
+    ],
+});
+
+//渲染折线图
+echartsRecords.setOption({
+    xAxis: {
+        data: {{keys|tojson}}
+    },
+    series:[
+        {
+            name:'恢复曲线',
+            type:'line',
+            data:{{values|tojson}},
+            markPoint : {
+                data : [
+                    {type : 'max', name: '最大值'},
+                    {type : 'min', name: '最小值'}
+                ]
+            }
+        }]
+});
+{% endblock %}

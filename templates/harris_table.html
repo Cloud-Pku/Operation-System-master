@@ -1,11 +1,398 @@
 {% extends 'index_patient.html' %}
-{% block title %}个人信息{% endblock %}
+{% block title %}Harris 评分提交{% endblock %}
 
 {% block body %}
 <fieldset class="layui-elem-field layui-field-title">
   <legend>Harris 评分表</legend>
   <div class="layui-field-box" style="font-size: large;line-height: 40px;">
       <span>{{time}}</span>
+    <form action ="record_harris" class="layui-form" method="post" id="predict">
+    {{ form.csrf_token }}
+        {{form.subtime(value = time, style="display:none")}}
+      <div class="layui-form-item">
+        <div class="layui-inline">
+          <label class="layui-form-label">疼痛</label>
+          <div class="layui-input-inline">
+            {{ form.pain(class="layui-input",placeholder="请输入疼痛指数",id = "pain") }}
+          </div>
+        </div>
+        <div class="layui-inline">
+          <label class="layui-form-label">功能</label>
+          <div class="layui-input-inline">
+            {{ form.func(class="layui-input",placeholder="请输入功能指数",id = "func") }}
+          </div>
+        </div>
+          <div class="layui-inline">
+          <label class="layui-form-label">活动范围</label>
+          <div class="layui-input-inline">
+            {{ form.rng(class="layui-input",placeholder="请输入活动范围指数",id = "rng") }}
+          </div>
+        </div>
+          <div class="layui-inline">
+          <label class="layui-form-label">总分</label>
+          <div class="layui-input-inline">
+            {{ form.score(class="layui-input",readonly="readonly",id = "score") }}
+          </div>
+        </div>
+
+            <div class="layui-input-block">
+                <button type="reset" class="layui-btn layui-btn-primary" lay-submit lay-filter="cal">计算</button>
+                <button type="reset" class="layui-btn layui-btn-primary" lay-submit lay-filter="tt">重置</button>
+              <button class="layui-btn" lay-submit lay-filter="formDemo">立即提交</button>
+
+            </div>
+
+      </div>
+    </form>
+
+      <div>
+            <fieldset class="layui-elem-field layui-field-title" style="margin-top: 50px;">
+                <legend>疼痛</legend>
+            </fieldset>
+            <div class="layui-form">
+              <table class="layui-table">
+
+                  <colgroup>
+                  <col width="150">
+                  <col width="300">
+                  <col width="150">
+                </colgroup>
+                    <thead>
+                <tr>
+                  <th>程度</th>
+                  <th>表现</th>
+                  <th>得分</th>
+                </tr>
+              </thead>
+                <tbody>
+                  <tr>
+                    <td>无</td>
+                    <td>无</td>
+                    <td>44</td>
+                  </tr>
+                  <tr>
+                    <td>弱</td>
+                    <td>偶痛或稍痛，不影响功能</td>
+                    <td>40</td>
+                  </tr>
+                  <tr>
+                    <td>轻度</td>
+                    <td>一般活动后不受影响，过量活动后偶有中度疼痛</td>
+                    <td>30</td>
+                  </tr>
+                  <tr>
+                    <td>中度</td>
+                    <td>可忍受，日常活动稍受限，但能正常工作，偶服比阿司匹林强的止痛剂</td>
+                    <td>20</td>
+                  </tr>
+                  <tr>
+                    <td>剧烈</td>
+                    <td>有时剧痛，但不必卧床；活动严重受限；经常服用比阿司匹林强的止痛剂</td>
+                    <td>10</td>
+                  </tr>
+                  <tr>
+                    <td>病废</td>
+                    <td>因疼痛被迫卧床；卧床也有剧痛；因疼痛跛行；病废</td>
+                    <td>0</td>
+                  </tr>
+                </tbody>
+              </table>
+        </div>
+        </div>
+      <div>
+            <fieldset class="layui-elem-field layui-field-title" style="margin-top: 50px;">
+                <legend>功能</legend>
+            </fieldset>
+            <div class="layui-form">
+              <table class="layui-table">
+
+                  <colgroup>
+                  <col width="150">
+                  <col width="150">
+                  <col width="300">
+                </colgroup>
+                <tbody>
+                  <tr>
+                      <th rowspan="16">
+                          日常活动
+                      </th>
+
+                  </tr>
+                  <tr>
+                      <th colspan="2">表现</th>
+                      <th>得分</th>
+                  </tr>
+                  <tr>
+                      <td rowspan="5">
+                          楼梯
+                      </td>
+                  </tr>
+                  <tr>
+                      <td>
+                          一步一阶，不用扶手
+                      </td>
+                      <td>
+                          4
+                      </td>
+                  </tr>
+                  <tr>
+                      <td>
+                          一步一阶，用扶手
+                      </td>
+                      <td>
+                          2
+                      </td>
+                  </tr>
+                  <tr>
+                      <td>
+                          用某种方法能上楼
+                      </td>
+                      <td>
+                          1
+                      </td>
+                  </tr>
+                  <tr>
+                      <td>
+                          不能上楼
+                      </td>
+                      <td>
+                          0
+                      </td>
+                  </tr>
+                  <tr>
+                      <td>交通</td>
+                      <td>有能力进入交通工具</td>
+                      <td>1</td>
+                  </tr>
+                  <tr>
+                      <td rowspan="4">
+                          坐
+                      </td>
+                  </tr>
+                  <tr>
+                      <td>在任何椅子上坐而无不适</td>
+                      <td>5</td>
+                  </tr>
+                  <tr>
+                      <td>在高椅子上坐半个小时而无不适</td>
+                      <td>3</td>
+                  </tr>
+                  <tr>
+                      <td>在任何椅子均不舒服</td>
+                      <td>0</td>
+                  </tr>
+                  <tr>
+                      <td rowspan="4">
+                          鞋袜
+                      </td>
+                  </tr>
+                  <tr>
+                      <td>穿袜、系鞋方便</td>
+                      <td>4</td>
+                  </tr>
+                  <tr>
+                      <td>穿袜、系鞋困难</td>
+                      <td>2</td>
+                  </tr>
+                  <tr>
+                      <td>不能穿袜、系鞋</td>
+                      <td>0</td>
+                  </tr>
+                  <tr>
+                      <td rowspan="5">步态</td>
+                  </tr>
+                  <tr>
+                      <td colspan="2">无跛行</td>
+                      <td>11</td>
+                  </tr>
+                  <tr>
+                      <td colspan="2">稍有跛行</td>
+                      <td>8</td>
+                  </tr>
+                  <tr>
+                      <td colspan="2">中等跛行</td>
+                      <td>5</td>
+                  </tr>
+                  <tr>
+                      <td colspan="2">严重跛行</td>
+                      <td>0</td>
+                  </tr>
+                  <tr>
+                      <td rowspan="8">行走辅助器</td>
+                  </tr>
+                  <tr>
+                      <td colspan="2">不需</td>
+                      <td>11</td>
+                  </tr>
+                  <tr>
+                      <td colspan="2">单手杖长距离</td>
+                      <td>7</td>
+                  </tr>
+                  <tr>
+                      <td colspan="2">多数时间用单手杖</td>
+                      <td>5</td>
+                  </tr>
+                  <tr>
+                      <td colspan="2">单拐</td>
+                      <td>3</td>
+                  </tr>
+                  <tr>
+                      <td colspan="2">双手杖</td>
+                      <td>2</td>
+                  </tr>
+                  <tr>
+                      <td colspan="2">双拐</td>
+                      <td>0</td>
+                  </tr>
+                  <tr>
+                      <td colspan="2">完全不能行走（必须说明原因）</td>
+                      <td>0</td>
+                  </tr>
+
+                  <tr>
+                      <td rowspan="6">距离</td>
+                  </tr>
+                  <tr>
+                      <td colspan="2">不受限</td>
+                      <td>11</td>
+                  </tr>
+                  <tr>
+                      <td colspan="2">6个街区</td>
+                      <td>8</td>
+                  </tr>
+                  <tr>
+                      <td colspan="2">2-3个街区</td>
+                      <td>5</td>
+                  </tr>
+                  <tr>
+                      <td colspan="2">室内活动</td>
+                      <td>2</td>
+                  </tr>
+                  <tr>
+                      <td colspan="2">卧床或坐椅（轮椅）</td>
+                      <td>0</td>
+                  </tr>
+
+
+                  <tr>
+                      <td rowspan="6">畸形</td>
+                  </tr>
+                  <tr>
+                      <td colspan="2">无下列畸形得4分</td>
+                      <td>4</td>
+                  </tr>
+                  <tr>
+                      <td colspan="2">固定的屈曲挛缩畸形小于30°</td>
+                      <td>2</td>
+                  </tr>
+                  <tr>
+                      <td colspan="2">固定的内收畸形小于10°</td>
+                      <td>2</td>
+                  </tr>
+                  <tr>
+                      <td colspan="2">固定的伸展内收畸形小于10°</td>
+                      <td>2</td>
+                  </tr>
+                  <tr>
+                      <td colspan="2">肢体短缩小于3.2cm</td>
+                      <td>2</td>
+                  </tr>
+
+                </tbody>
+              </table>
+            </div>
+        </div>
+      <div>
+            <fieldset class="layui-elem-field layui-field-title" style="margin-top: 50px;">
+                <legend>活动范围（指数值由活动度数与相应的指数相乘而得得分）</legend>
+            </fieldset>
+            <div class="layui-form">
+              <table class="layui-table">
+
+                  <colgroup>
+                  <col width="150">
+                  <col width="300">
+                  <col width="150">
+                </colgroup>
+
+                <tbody>
+                  <tr>
+                    <td rowspan="4">前屈</td>
+                  </tr>
+                  <tr>
+                    <td colspan="3">0°-45° ×1.0</td>
+                  </tr>
+                  <tr>
+                    <td colspan="3">45°-90° ×0.6</td>
+                  </tr>
+                  <tr>
+                    <td colspan="3">90°-110° ×0.3</td>
+                  </tr>
+                  <tr>
+                    <td rowspan="4">外展</td>
+                  </tr>
+                  <tr>
+                    <td colspan="3">0°-15° ×0.8</td>
+                  </tr>
+                  <tr>
+                    <td colspan="3">15°-20° ×0.3</td>
+                  </tr>
+                  <tr>
+                    <td colspan="3">大于20° ×0.0</td>
+                  </tr>
+                  <tr>
+                    <td rowspan="3">伸展外旋</td>
+                  </tr>
+                  <tr>
+                    <td colspan="3">0°-15° ×0.4</td>
+                  </tr>
+                  <tr>
+                    <td colspan="3">大于15° ×0.0</td>
+                  </tr>
+                  <tr>
+                    <td rowspan="1">伸展内旋</td>
+                      <td colspan="3">任何活动 ×0.0</td>
+                  </tr>
+                  <tr>
+                    <td rowspan="1">内收</td>
+                      <td colspan="3">0°-15° ×0.2</td>
+                  </tr>
+                  <tr>
+                    <td colspan="4">活动范围的总分为指数值的和乘0.05</td>
+                  </tr>
+
+
+                </tbody>
+              </table>
+        </div>
+        </div>
+
   </div>
 </fieldset>
+{% endblock %}
+
+{% block script %}
+
+    layui.use('form', function(){
+      var form = layui.form;
+
+      form.on('submit(tt)', function(data){
+           var field = data.field;
+           //执行操作
+            document.getElementById("pain").value="";
+            document.getElementById("func").value="";
+            document.getElementById("rng").value="";
+            document.getElementById("score").value="";
+            return false;
+            });
+        form.on('submit(cal)', function(data){
+           var field = data.field;
+           //执行操作
+            document.getElementById("score").value=parseInt(document.getElementById("pain").value)+parseInt(document.getElementById("func").value)+parseInt(document.getElementById("rng").value);
+
+            return false;
+            });
+
+    });
+
 {% endblock %}

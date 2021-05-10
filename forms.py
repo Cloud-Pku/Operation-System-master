@@ -28,6 +28,17 @@ class FeatureForm(FlaskForm):
     label = StringField(u'label', validators=[DataRequired()])
     submit = SubmitField(u'预测')
 
+
+class HarrisScoreForm(FlaskForm):
+    subtime = StringField(u'subtime', validators=[DataRequired()])
+    pain = StringField(u'pain', validators=[DataRequired()])
+    func = StringField(u'func', validators=[DataRequired()])
+    rng = StringField(u'rng', validators=[DataRequired()])
+    score = StringField(u'score', validators=[DataRequired()])
+    submit = SubmitField(u'提交')
+
+
+
 class SearchBookForm(FlaskForm):
     methods = [('book_name', '书名'), ('author', '作者'), ('class_name', '类别'), ('isbn', 'ISBN')]
     method = SelectField(choices=methods, validators=[DataRequired()], coerce=str)

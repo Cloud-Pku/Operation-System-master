@@ -2,10 +2,10 @@ from flask import Flask, render_template, session, redirect, url_for, flash, req
 import os
 from flask_sqlalchemy import SQLAlchemy
 from flask_script import Manager, Shell
-from forms import Login, SearchBookForm, ChangePasswordForm, EditInfoForm, SearchStudentForm, NewStoreForm, StoreForm, BorrowForm,FeatureForm
+from forms import Login, SearchBookForm, ChangePasswordForm, EditInfoForm, SearchStudentForm, NewStoreForm, StoreForm, BorrowForm,FeatureForm, HarrisScoreForm
 from flask_login import UserMixin, LoginManager, login_required, login_user, logout_user, current_user
 import time, datetime
-
+from functools import cmp_to_key
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
@@ -42,13 +42,13 @@ def row2dict(row):
 
 
 
-
 class Admin(UserMixin, db.Model):
     __tablename__ = 'admin'
     admin_id = db.Column(db.String(6), primary_key=True)
     admin_name = db.Column(db.String(32))
     password = db.Column(db.String(24))
     right = db.Column(db.String(32))
+    harris_table =  db.relationship('HarrisScoreData',backref='user')
 
     def __init__(self, admin_id, admin_name, password, right):
         self.admin_id = admin_id
@@ -68,7 +68,6 @@ class Admin(UserMixin, db.Model):
     def __repr__(self):
         return '<Admin %r>' % self.admin_name
 
-
 class PredictData(db.Model):
     __tablename__ = 'predict_data'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -82,65 +81,26 @@ class PredictData(db.Model):
         self.f3 = f3
         self.label = label
     def __repr__(self):
-        return '<f1: %r f2: %r f3: %r label: %r>\n' % (self.f1,self.f2,self.f3,self.label)
+        return '<f1: %r f2: %r f3: %r label: %r>' % (self.f1,self.f2,self.f3,self.label)
 
-
-class Book(db.Model):
-    __tablename__ = 'book'
-    isbn = db.Column(db.String(13), primary_key=True)
-    book_name = db.Column(db.String(64))
-    author = db.Column(db.String(64))
-    press = db.Column(db.String(32))
-    class_name = db.Column(db.String(64))
-
-    def __repr__(self):
-        return '<Book %r>' % self.book_name
-
-
-class Student(db.Model):
-    __tablename__ = 'student'
-    card_id = db.Column(db.String(8), primary_key=True)
-    student_id = db.Column(db.String(9))
-    student_name = db.Column(db.String(32))
-    sex = db.Column(db.String(2))
-    telephone = db.Column(db.String(11), nullable=True)
-    enroll_date = db.Column(db.String(13))
-    valid_date = db.Column(db.String(13))
-    loss = db.Column(db.Boolean, default=False)  # 是否挂失
-    debt = db.Column(db.Boolean, default=False)  # 是否欠费
-
-    def __repr__(self):
-        return '<Student %r>' % self.student_name
-
-
-class Inventory(db.Model):
-    __tablename__ = 'inventory'
-    barcode = db.Column(db.String(6), primary_key=True)
-    isbn = db.Column(db.ForeignKey('book.isbn'))
-    storage_date = db.Column(db.String(13))
-    location = db.Column(db.String(32))
-    withdraw = db.Column(db.Boolean, default=False)  # 是否注销
-    status = db.Column(db.Boolean, default=True)  # 是否在馆
-    admin = db.Column(db.ForeignKey('admin.admin_id'))  # 入库操作员
-
-    def __repr__(self):
-        return '<Inventory %r>' % self.barcode
-
-
-class ReadBook(db.Model):
-    __tablename__ = 'readbook'
+class HarrisScoreData(db.Model):
+    __tablename__ = 'harrisscore_data'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    barcode = db.Column(db.ForeignKey('inventory.barcode'), index=True)
-    card_id = db.Column(db.ForeignKey('student.card_id'), index=True)
-    start_date = db.Column(db.String(13))
-    borrow_admin = db.Column(db.ForeignKey('admin.admin_id'))  # 借书操作员
-    end_date = db.Column(db.String(13), nullable=True)
-    return_admin = db.Column(db.ForeignKey('admin.admin_id'))  # 还书操作员
-    due_date = db.Column(db.String(13))  # 应还日期
-
+    subtime = db.Column(db.String(64))
+    pain = db.Column(db.String(64))
+    func = db.Column(db.String(64))
+    rng = db.Column(db.String(64))
+    score = db.Column(db.String(64))
+    user_id = db.Column(db.Integer, db.ForeignKey('admin.admin_id'))
+    def __init__(self,subtime, pain, func, rng, score,user_id):
+        self.subtime = subtime
+        self.pain = pain
+        self.func = func
+        self.rng = rng
+        self.score = score
+        self.user_id = user_id
     def __repr__(self):
-        return '<ReadBook %r>' % self.id
-
+        return '<time: %r pain: %r function: %r range: %r score: %r>\n' % (self.subtime,self.pain,self.func,self.rng,self.score)
 
 @login_manager.user_loader
 def load_user(admin_id):
@@ -340,42 +300,76 @@ def harris_table():
     if current_user.right!='2':
         return render_template('doctor_error.html')
     print(request.args["time"])
-    return render_template('harris_table.html',time = request.args["time"])
+    form = HarrisScoreForm()
+    return render_template('harris_table.html',time = request.args["time"],form = form)
 
-
-
-
-
-
-
-
-
-
-
-
-@app.route('/echarts')
+@app.route("/record_harris", methods=["POST"])
 @login_required
-def echarts():
-    days = []
-    num = []
-    today_date = datetime.date.today()
-    today_str = today_date.strftime("%Y-%m-%d")
-    today_stamp = time.mktime(time.strptime(today_str + ' 00:00:00', '%Y-%m-%d %H:%M:%S'))
-    ten_ago = int(today_stamp) - 9 * 86400
-    for i in range(0, 10):
-        borr = ReadBook.query.filter_by(start_date=str((ten_ago+i*86400)*1000)).count()
-        retu = ReadBook.query.filter_by(end_date=str((ten_ago+i*86400)*1000)).count()
-        num.append(borr + retu)
-        days.append(timeStamp((ten_ago+i*86400)*1000))
-    data = []
-    for i in range(0, 10):
-        item = {'name': days[i], 'num': num[i]}
-        data.append(item)
-    return jsonify(data)
+def record_harris():
+    if current_user.right!='2':
+        return render_template('doctor_error.html')
+    form = HarrisScoreForm()
+    new_data = HarrisScoreData(subtime=form.subtime.data,pain=form.pain.data,func=form.func.data,rng=form.rng.data,score=form.score.data,user_id = current_user.admin_id)
+    db.session.add(new_data)
+    db.session.commit()
+    return render_template('harris_date.html')
+
+
+
+def data_compare(it1,it2):
+    tmp1 = tmp2 = ''
+    for i in it1.split('-'):
+        tmp1 += i
+    for i in it2.split('-'):
+        tmp2 += i
+    tmp1 = int(tmp1)
+    tmp2 = int(tmp2)
+    if tmp1<tmp2:
+        return -1
+    elif tmp1>tmp2:
+        return 1
+    else:
+        return 0
+
+def sortedDict(adict):
+    keys = list(adict.keys())
+    keys.sort(key = cmp_to_key(data_compare))
+    value = []
+    for key in keys:
+        value.append(adict[key])
+    return keys,value
+
+@app.route("/harris_echarts")
+@login_required
+def harris_echarts():
+    if current_user.right!='2':
+        return render_template('doctor_error.html')
+
+    print(current_user.harris_table)
+    tmp = current_user.harris_table
+    data = {}
+    for i in tmp:
+        data[i.subtime] = i.score
+
+    keys,values = sortedDict(data)
+    print(keys,values)
+    #return redirect(url_for('index_patient'))
+
+    return render_template('harris_echarts.html', keys = keys,values = values)
+
+
+
+
+
+
+
+
+
+
 
 
 
 
 
 if __name__ == '__main__':
-    app.run()
+    app.run(host="0.0.0.0",port=5000)
