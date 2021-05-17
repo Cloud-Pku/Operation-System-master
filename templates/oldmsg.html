@@ -31,7 +31,7 @@ layui.use('table', function(){
     var data = obj.data;
     console.log(obj.data.id)
     if(obj.event === 'del'){
-      layer.confirm('真的删除行么', function(index){
+      layer.confirm('确定删除吗', function(index){
         obj.del();
         layer.close(index);
 

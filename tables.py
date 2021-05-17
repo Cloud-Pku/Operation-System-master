@@ -2,7 +2,7 @@ from flask import Flask, render_template, session, redirect, url_for, flash, req
 import os
 from flask_sqlalchemy import SQLAlchemy
 from flask_script import Manager, Shell
-from forms import Login, SearchBookForm, ChangePasswordForm, EditInfoForm, SearchStudentForm, NewStoreForm, StoreForm, BorrowForm
+from forms import Login,  ChangePasswordForm, EditInfoForm
 from flask_login import UserMixin, LoginManager, login_required, login_user, logout_user, current_user
 import time, datetime
 
@@ -24,7 +24,7 @@ class Admin(UserMixin, db.Model):
     password = db.Column(db.String(24))
     right = db.Column(db.String(32))
     harris_table =  db.relationship('HarrisScoreData',backref='user')
-
+    advice_table = db.relationship('AdviceData',backref='user')
     def __init__(self, admin_id, admin_name, password, right):
         self.admin_id = admin_id
         self.admin_name = admin_name
@@ -77,9 +77,22 @@ class HarrisScoreData(db.Model):
     def __repr__(self):
         return '<time: %r pain: %r function: %r range: %r score: %r>\n' % (self.subtime,self.pain,self.func,self.rng,self.score)
 
+class AdviceData(db.Model):
+    __tablename__ = 'advice_data'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    subtime = db.Column(db.String(64))
+    advice = db.Column(db.String(64))
+    user_id = db.Column(db.Integer, db.ForeignKey('admin.admin_id'))
+    def __init__(self,subtime, advice,user_id):
+        self.subtime = subtime
+        self.advice = advice
+        self.user_id = user_id
+    def __repr__(self):
+        return '<time: %r advice: %r >\n' % (self.subtime,self.advice)
+
 
 # # 创建新User对象:
-# new_user =Admin(admin_id='11111',admin_name='doctor',password='12345',right='1')
+# new_user =Admin(admin_id='33333',admin_name='patient2',password='12345',right='2')
 # db.session.add(new_user)
 # db.session.commit()
 
@@ -88,8 +101,8 @@ class HarrisScoreData(db.Model):
 # db.session.delete(stu)  # 删除
 # db.session.commit()  # 提交事务
 
-stu = Admin.query.filter_by(admin_id='22222').first()
-print(stu.harris_table)
+# stu = Admin.query.filter_by(admin_id='22222').first()
+# print(stu.harris_table)
 
 # sut = PredictData.query.all()
 # print(sut)
@@ -99,4 +112,4 @@ print(stu.harris_table)
 # PredictData.query.delete()
 # db.session.commit()
 
-#db.create_all()
+# db.create_all()

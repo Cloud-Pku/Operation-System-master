@@ -8,6 +8,7 @@
   <script src="https://cdn.staticfile.org/jquery/3.2.1/jquery.min.js"></script>
   <script src="https://cdn.staticfile.org/popper.js/1.12.5/umd/popper.min.js"></script>
   <script src="https://cdn.staticfile.org/twitter-bootstrap/4.1.0/js/bootstrap.min.js"></script>
+    <script src="https://cdn.staticfile.org/echarts/4.5.0/echarts.min.js"></script>
   <style>
       .alert{position:relative;padding:.75rem 1.25rem;margin-bottom:1rem;border:1px solid transparent;border-radius:.25rem}
       .close{position:absolute;top:0;right:0;padding:.75rem 1.25rem;color:inherit}
@@ -56,9 +57,7 @@
         <li class="layui-nav-item">
           <a href="javascript:;">病患管理</a>
           <dl class="layui-nav-child">
-             <dd><a href="javascript:;">患者信息</a></dd>
-             <dd><a href="javascript:;">tmp</a></dd>
-             <dd><a href="javascript:;">tmp2</a></dd>
+             <dd><a href="{{ url_for('patient_msg') }}">患者信息</a></dd>
           </dl>
         </li>
       </ul>
@@ -100,6 +99,9 @@
 </script>
 <script type="text/html" id="barDemo">
   <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+</script>
+<script type="text/html" id="lookup">
+  <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="lookup">查看</a>
 </script>
 
 </body>

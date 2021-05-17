@@ -1,0 +1,21 @@
+{% extends 'index_patient.html' %}
+{% block title %}医生建议{% endblock %}
+
+{% block body %}
+<fieldset class="layui-elem-field layui-field-title">
+<legend>医生建议</legend>
+     &emsp;&emsp;&emsp;&emsp;<br>
+{% for val in data %}
+
+
+    {{ val +": "}}<br>
+    &emsp;&emsp;&emsp;&emsp;</n>
+    {{data[val]}}<br><br>
+
+</fieldset>
+
+{% endfor %}
+{% endblock %}
+{% block script %}
+
+{% endblock %}

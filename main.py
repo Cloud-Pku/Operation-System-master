@@ -2,10 +2,14 @@ from flask import Flask, render_template, session, redirect, url_for, flash, req
 import os
 from flask_sqlalchemy import SQLAlchemy
 from flask_script import Manager, Shell
-from forms import Login, SearchBookForm, ChangePasswordForm, EditInfoForm, SearchStudentForm, NewStoreForm, StoreForm, BorrowForm,FeatureForm, HarrisScoreForm
+from forms import Login,  ChangePasswordForm, EditInfoForm, FeatureForm, HarrisScoreForm,AdviceForm
 from flask_login import UserMixin, LoginManager, login_required, login_user, logout_user, current_user
 import time, datetime
 from functools import cmp_to_key
+from tables import  Admin ,PredictData ,HarrisScoreData ,AdviceData
+import json
+
+
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
@@ -40,7 +44,7 @@ def row2dict(row):
     return d
 
 
-
+'''
 
 class Admin(UserMixin, db.Model):
     __tablename__ = 'admin'
@@ -101,7 +105,7 @@ class HarrisScoreData(db.Model):
         self.user_id = user_id
     def __repr__(self):
         return '<time: %r pain: %r function: %r range: %r score: %r>\n' % (self.subtime,self.pain,self.func,self.rng,self.score)
-
+'''
 @login_manager.user_loader
 def load_user(admin_id):
     return Admin.query.get(int(admin_id))
@@ -234,6 +238,9 @@ def oldmsg():
         return render_template('patient_error.html')
     return render_template('oldmsg.html')
 
+
+
+
 @app.route("/oldmsg/table/", methods=["GET", "POST"])
 @login_required
 def oldmsg_table():
@@ -284,6 +291,74 @@ def changeitem():
         return jsonify({"success": 200, "msg": "change success"})
     except Exception as e:
         return jsonify({"error": 1001, "msg": "change fail"})
+
+
+#--------doctor lookup the msg of patient
+
+@app.route("/patient_msg", methods=["GET", "POST"])
+@login_required
+def patient_msg():
+    if current_user.right!='1':
+        return render_template('patient_error.html')
+    return render_template('doctor_patientmsg.html')
+
+@app.route("/lookup_item", methods=["GET","POST"])
+@login_required
+def lookup_item():
+    patient_id = request.args.get('patient_id')
+    print(patient_id)
+
+    curr_patient = Admin.query.get(patient_id)
+    print(curr_patient.harris_table)
+    tmp = curr_patient.harris_table
+    data = {}
+    for i in tmp:
+        data[i.subtime] = i.score
+
+    keys,values = sortedDict(data)
+    print(keys,values)
+    #return redirect(url_for('index_patient'))
+    form = AdviceForm()
+    form.patient_id.data = patient_id
+    return render_template('doctor_lookup_harris_echarts.html', keys = keys,values = values, patient_id = patient_id, form = form)
+
+
+
+
+@app.route("/patient_msg/table/", methods=["GET", "POST"])
+@login_required
+def patient_msg_table():
+    if current_user.right!='1':
+        return render_template('patient_error.html')
+    page = int(request.args.get("page"))
+    limit = int(request.args.get("limit"))
+    print(page,limit)
+    data = Admin.query.filter_by(right='2').all()
+    tmp = []
+    start = (page-1)*limit
+    end = min(len(data),start+limit)
+    data = data[start:end]
+    for i in data:
+        tmp.append(row2dict(i))
+    print(tmp)
+    #return "nihao"
+    return jsonify({'code':0,'data':tmp})
+
+
+@app.route("/advice", methods=["GET","POST"])
+@login_required
+def advice():
+    if current_user.right!='1':
+        return render_template('patient_error.html')
+    id = request.form["patient_id"]
+    curr_time = time.asctime(time.localtime(time.time()))
+    advice = request.form["advice"]
+    new_data = AdviceData(subtime=curr_time,advice=advice,user_id=id)
+    print(new_data)
+    db.session.add(new_data)
+    db.session.commit()
+
+    return redirect(url_for('patient_msg'))
 
 #------------------------------------------- patient model ----------------------------------------------------
 
@@ -359,7 +434,18 @@ def harris_echarts():
 
 
 
+@app.route("/get_advice", methods=["GET","POST"])
+@login_required
+def get_advice():
+    if current_user.right!='2':
+        return render_template('doctor_error.html')
+    tmp = current_user.advice_table
+    data = {}
+    for i in tmp:
+        data[i.subtime] = i.advice
 
+
+    return render_template('patient_advice.html', data = data)
 
 
 

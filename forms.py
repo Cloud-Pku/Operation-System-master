@@ -39,35 +39,10 @@ class HarrisScoreForm(FlaskForm):
 
 
 
-class SearchBookForm(FlaskForm):
-    methods = [('book_name', '书名'), ('author', '作者'), ('class_name', '类别'), ('isbn', 'ISBN')]
-    method = SelectField(choices=methods, validators=[DataRequired()], coerce=str)
-    content = StringField(validators=[DataRequired()])
-    submit = SubmitField('搜索')
 
 
-class SearchStudentForm(FlaskForm):
-    card = StringField(validators=[DataRequired()])
-    submit = SubmitField('搜索')
+class AdviceForm(FlaskForm):
+    patient_id = StringField(u'patient_id', validators=[DataRequired()])
+    advice = StringField(u'advice', validators=[DataRequired()])
 
-
-class StoreForm(FlaskForm):
-    barcode = StringField(validators=[DataRequired(), Length(6)])
-    isbn = StringField(validators=[DataRequired(), Length(13)])
-    location = StringField(validators=[DataRequired(), Length(1, 32)])
     submit = SubmitField(u'提交')
-
-
-class NewStoreForm(FlaskForm):
-    isbn = StringField(validators=[DataRequired(), Length(13)])
-    book_name = StringField(validators=[DataRequired(), Length(1, 64)])
-    press = StringField(validators=[DataRequired(), Length(1, 32)])
-    author = StringField(validators=[DataRequired(), Length(1, 64)])
-    class_name = StringField(validators=[DataRequired(), Length(1, 64)])
-    submit = SubmitField(u'提交')
-
-
-class BorrowForm(FlaskForm):
-    card = StringField(validators=[DataRequired()])
-    book_name = StringField(validators=[DataRequired()])
-    submit = SubmitField(u'搜索')
